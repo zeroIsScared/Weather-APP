@@ -1,0 +1,16 @@
+form {
+text-align: center;
+}
+
+#form h1 {
+    padding: 2em;
+}
+
+#form input,button{
+    padding: 1em;
+}
+
+div {
+    text-align: center;
+    padding: 3em;
+}
