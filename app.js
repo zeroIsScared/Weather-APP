@@ -11,7 +11,24 @@ const form = document.querySelector('#form');
 const input = document.querySelector('input');
 const div = document.querySelector('#output');
 
+const cityNameInputed = () => {
+    const city = input.value;
+    let cityName;
+
+    if (city !== "" || city !== " ") {
+        cityName = city.trim();
+        return cityName;
+
+    } else {
+        console.log(`${city} is not a valid city name!`);
+        return undefined;
+    }
+
+}
+
 const saveDataToCache = (key, data) => {
+    data.date = new Date();
+
     localStorage.setItem(key, JSON.stringify(data));
 }
 
@@ -19,17 +36,45 @@ const loadDataFromCache = () => {
     return JSON.parse(localStorage.getItem('data'))
 }
 
-
 const checkDataCache = (key) => {
     return localStorage.getItem(key);
 
 }
 
+const getCityNameFromCache = () => {
+    const { name: cityName } = loadDataFromCache();
+    console.log(cityName);
+    return cityName;
+}
+
+const checkCityName = () => {
+    const cityNameCache = getCityNameFromCache();
+    const cityNameInputed = cityNameInputed();
+    if (cityNameCache === cityNameInputed) {
+        return true;
+    }
+}
+
+const checkDateOfCachedData = (data) => {
+    const cashData = JSON.parse(localStorage.getItem(data));
+
+    console.log(cashData);
+    const { date: dateFromCache } = cashData;
+    const cacheDate = new Date(dateFromCache).getTime();
+    const nowDate = new Date().getTime();
+    console.log(cacheDate, nowDate);
+    if (Math.abs(cacheDate - nowDate) >= (1000 * 60 * 60)) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
 const load = (cb) => {
     //1. check the cache
-    if (checkDataCache('data')) {
+    if (checkDataCache('data') && checkDateOfCachedData('data') === 0 && checkCityName === true) {
         // 2. take from cache
-
+        console.log(checkDateOfCachedData('data'));
         data = loadDataFromCache('data');
         console.log(data);
         cb(data);
@@ -55,19 +100,13 @@ const render = (data) => {
 
 function loadDataFromAPI(cb) {
 
-    const city = input.value;
-    let cityName;
-
-    if (city !== "" || city !== " ") {
-        cityName = city.trim();
-    }
 
     let xhr = new XMLHttpRequest();
     const apiKey = `3cf84b8c25e74a840e93ed93926eb80f`;
 
     xhr.open(
         'GET',
-        `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&appid=${apiKey}`);
+        `http://api.openweathermap.org/geo/1.0/direct?q=${cityNameInputed()}&appid=${apiKey}`);
 
     xhr.send();
     xhr.onload = () => {
