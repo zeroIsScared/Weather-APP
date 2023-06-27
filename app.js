@@ -11,6 +11,15 @@ const form= document.querySelector('#form');
 const input = document.querySelector('input');
 const div = document.querySelector('#output');
 
+const saveDataToCache = (data) => {
+   localStorage.setItem('data', JSON.stringify(data));
+}
+
+const loadDataFromCache = () => {
+    return JSON.parse(localStorage.getItem('data'))
+}
+
+
 const render= (data) =>{
     //console.log(data);    
     const{main: {temp}, name: cityName } = data;
