@@ -16,19 +16,18 @@ const cityNameInputed = () => {
     let cityName;
 
     if (city !== "" || city !== " ") {
-        cityName = city.trim();
+        cityName = city.trim().toLocaleLowerCase();
         return cityName;
 
     } else {
         console.log(`${city} is not a valid city name!`);
         return undefined;
     }
-
 }
 
 const saveDataToCache = (key, data) => {
     data.date = new Date();
-
+    data.cityName = cityNameInputed();
     localStorage.setItem(key, JSON.stringify(data));
 }
 
@@ -38,19 +37,20 @@ const loadDataFromCache = () => {
 
 const checkDataCache = (key) => {
     return localStorage.getItem(key);
-
 }
 
 const getCityNameFromCache = () => {
-    const { name: cityName } = loadDataFromCache();
+    const {cityName } = loadDataFromCache();
     console.log(cityName);
     return cityName;
 }
 
 const checkCityName = () => {
     const cityNameCache = getCityNameFromCache();
-    const cityNameInputed = cityNameInputed();
-    if (cityNameCache === cityNameInputed) {
+    console.log(cityNameCache);
+    let cityNameFromInput = cityNameInputed();
+    console.log(cityNameInputed);
+    if (cityNameCache === cityNameFromInput) {
         return true;
     }
 }
@@ -72,8 +72,9 @@ const checkDateOfCachedData = (data) => {
 
 const load = (cb) => {
     //1. check the cache
-    if (checkDataCache('data') && checkDateOfCachedData('data') === 0 && checkCityName === true) {
+    if (checkDataCache('data') && checkDateOfCachedData('data') === 0 && checkCityName() === true) {
         // 2. take from cache
+        console.log(checkCityName())
         console.log(checkDateOfCachedData('data'));
         data = loadDataFromCache('data');
         console.log(data);
@@ -112,7 +113,7 @@ function loadDataFromAPI(cb) {
     xhr.onload = () => {
         let data = JSON.parse(xhr.responseText);
         console.log(data);
-        if (data !== []) {
+        if (data.length !== 0) {
             const [{ lat, lon }] = data;
 
             console.log(lon, lat)
