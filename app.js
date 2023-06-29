@@ -12,20 +12,23 @@ const input = document.querySelector('input');
 const div = document.querySelector('#output');
 
 const cityNameInputed = () => {
-    const city = input.value.trim().toLowerCase();
+    const city = input.value;
     let cityName;
 
-    if (city !== "") {        
+    if (city.trim().toLowerCase() !== "") {
+        const cityName = city.trim().toLowerCase();
         return cityName;
+
     } else {
         console.log(`${city} is not a valid city name!`);
         return undefined;
     }
+
 }
 
 const saveDataToCache = (key, data) => {
     data.date = new Date();
-    data.cityName = cityNameInputed();
+
     localStorage.setItem(key, JSON.stringify(data));
 }
 
@@ -35,20 +38,19 @@ const loadDataFromCache = () => {
 
 const checkDataCache = (key) => {
     return localStorage.getItem(key);
+
 }
 
 const getCityNameFromCache = () => {
-    const {cityName } = loadDataFromCache();
+    const { name: cityName } = loadDataFromCache();
     console.log(cityName);
     return cityName;
 }
 
 const checkCityName = () => {
     const cityNameCache = getCityNameFromCache();
-    console.log(cityNameCache);
-    let cityNameFromInput = cityNameInputed();
-    console.log(cityNameInputed);
-    if (cityNameCache === cityNameFromInput) {
+    const cityNameInputed = cityNameInputed();
+    if (cityNameCache === cityNameInputed) {
         return true;
     }
 }
@@ -70,9 +72,8 @@ const checkDateOfCachedData = (data) => {
 
 const load = (cb) => {
     //1. check the cache
-    if (checkDataCache('data') && checkDateOfCachedData('data') === 0 && checkCityName() === true) {
+    if (checkDataCache('data') && checkDateOfCachedData('data') === 0 && checkCityName === true) {
         // 2. take from cache
-        console.log(checkCityName())
         console.log(checkDateOfCachedData('data'));
         data = loadDataFromCache('data');
         console.log(data);
@@ -102,33 +103,39 @@ function loadDataFromAPI(cb) {
 
     let xhr = new XMLHttpRequest();
     const apiKey = `3cf84b8c25e74a840e93ed93926eb80f`;
+    if (cityNameInputed() !== undefined) {
+        console.log(cityNameInputed());
+        xhr.open(
+            'GET',
+            `http://api.openweathermap.org/geo/1.0/direct?q=${cityNameInputed()}&appid=${apiKey}`);
 
-    xhr.open(
-        'GET',
-        `http://api.openweathermap.org/geo/1.0/direct?q=${cityNameInputed()}&appid=${apiKey}`);
+        xhr.send();
+        xhr.onload = () => {
+            let data = JSON.parse(xhr.responseText);
+            console.log(data);
+            if (data !== []) {
+                const [{ lat, lon }] = data;
 
-    xhr.send();
-    xhr.onload = () => {
-        let data = JSON.parse(xhr.responseText);
-        console.log(data);
-        if (data.length !== 0) {
-            const [{ lat, lon }] = data;
+                console.log(lon, lat)
+                xhr.open(
+                    'GET',
+                    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+                )
+                xhr.send();
+                xhr.onload = () => {
+                    let data = JSON.parse(xhr.responseText);
+                    cb(data);
 
-            console.log(lon, lat)
-            xhr.open(
-                'GET',
-                `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-            )
-            xhr.send();
-            xhr.onload = () => {
-                let data = JSON.parse(xhr.responseText);
-                cb(data);
-
+                }
+            } else {
+                div.textContent = `Sorry there were no results found for your city!`
             }
-        } else {
-            div.textContent = `Sorry there were no results found for your city!`
         }
+
+    } else {
+        div.textContent = `Please enter a valid city name!!`
     }
+
 }
 
 
