@@ -12,13 +12,11 @@ const input = document.querySelector('input');
 const div = document.querySelector('#output');
 
 const cityNameInputed = () => {
-    const city = input.value;
+    const city = input.value.trim().toLowerCase();
     let cityName;
 
-    if (city !== "" || city !== " ") {
-        cityName = city.trim().toLocaleLowerCase();
+    if (city !== "") {        
         return cityName;
-
     } else {
         console.log(`${city} is not a valid city name!`);
         return undefined;
